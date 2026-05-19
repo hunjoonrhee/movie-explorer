@@ -5,7 +5,15 @@
   }
   @for (movie of movies$ | async; track movie.id) {
     <div>
-      <span>{{ movie.title }}</span>
+      <span (click)="showDetail(movie.id)">{{ movie.title }}</span>
+    </div>
+  }
+  @if (selectedMovie$ | async; as movie) {
+    <div>
+      <span>{{ movie.title }} </span>
+      <span>{{ movie.rating }} </span>
+      <span>{{ movie.genre }} </span>
+      <span>{{ movie.description }} </span>
     </div>
   }
 </div>

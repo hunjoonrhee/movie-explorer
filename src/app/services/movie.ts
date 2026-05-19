@@ -66,6 +66,8 @@ const MOCK_MOVIES: Movie[] = [
 export class MovieService {
   private selectedGenre$ = new BehaviorSubject<string>('All');
 
+  private selectedId$ = new BehaviorSubject<number | null>(null);
+
   getMovies(): Observable<Movie[]> {
     return of(MOCK_MOVIES).pipe(delay(300));
   }
@@ -84,5 +86,13 @@ export class MovieService {
 
   getSelectedGenre$(): Observable<string> {
     return this.selectedGenre$.asObservable();
+  }
+
+  selectMovie(id: number): void {
+    this.selectedId$.next(id);
+  }
+
+  getSelectedId$(): Observable<number | null> {
+    return this.selectedId$.asObservable();
   }
 }

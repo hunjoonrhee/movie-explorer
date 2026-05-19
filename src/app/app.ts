@@ -2,7 +2,17 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { MovieService } from './services/movie';
 import { Movie } from './models/movie.model';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { catchError, combineLatest, EMPTY, map, Observable, startWith, switchMap, tap } from 'rxjs';
+import {
+  catchError,
+  combineLatest,
+  EMPTY,
+  filter,
+  map,
+  Observable,
+  startWith,
+  switchMap,
+  tap,
+} from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
@@ -15,6 +25,7 @@ export class App implements OnInit {
   readonly service = inject(MovieService);
   readonly control = new FormControl<string>('');
   movies$!: Observable<Movie[]>;
+  selectedMovie$!: Observable<Movie | undefined>;
 
   ngOnInit(): void {
     this.movies$ = combineLatest([
@@ -40,9 +51,17 @@ export class App implements OnInit {
         ),
       ),
     );
+    this.selectedMovie$ = this.service.getSelectedId$().pipe(
+      filter((id) => id !== null),
+      switchMap((id) => this.service.getMovieById(id)),
+    );
   }
 
   showGenres(genre: string) {
     this.service.setGenre(genre);
+  }
+
+  showDetail(id: number) {
+    this.service.selectMovie(id);
   }
 }
