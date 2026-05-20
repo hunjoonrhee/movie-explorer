@@ -3,6 +3,9 @@
   @for (genre of service.getGenres(); track genre) {
     <button (click)="showGenres(genre)">{{ genre }}</button>
   }
+  @if (isLoading()) {
+    <span>로딩 중...</span>
+  }
   @for (movie of movies$ | async; track movie.id) {
     <div>
       <span (click)="showDetail(movie.id)">{{ movie.title }}</span>

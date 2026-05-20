@@ -3,6 +3,7 @@ import { MovieService } from './services/movie';
 import { Movie } from './models/movie.model';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
+  BehaviorSubject,
   catchError,
   combineLatest,
   debounceTime,
@@ -28,6 +29,7 @@ export class App implements OnInit {
   readonly control = new FormControl<string>('');
   movies$!: Observable<Movie[]>;
   selectedMovie$!: Observable<Movie | undefined>;
+  isLoading = signal<boolean>(false);
 
   ngOnInit(): void {
     this.movies$ = combineLatest([
@@ -35,6 +37,7 @@ export class App implements OnInit {
       this.control.valueChanges.pipe(debounceTime(300), distinctUntilChanged(), startWith('')),
     ]).pipe(
       tap(([genre, search]) => console.log('combineLatest:', genre, search)),
+      tap(() => this.isLoading.set(true)),
       switchMap(([genre, search]) =>
         this.service.getMovies().pipe(
           tap((movies) => console.log('getMovies count:', movies.length)),
@@ -45,6 +48,7 @@ export class App implements OnInit {
                 movie.title.toLowerCase().includes((search ?? '').trim().toLowerCase()),
               ),
           ),
+          tap(() => this.isLoading.set(false)),
           tap((filtered) => console.log('filtered count:', filtered.length)),
           catchError((err) => {
             console.error('에러:', err);
@@ -55,7 +59,9 @@ export class App implements OnInit {
     );
     this.selectedMovie$ = this.service.getSelectedId$().pipe(
       filter((id) => id !== null),
+      tap(() => this.isLoading.set(true)),
       switchMap((id) => this.service.getMovieById(id)),
+      tap(() => this.isLoading.set(false)),
     );
   }
 
