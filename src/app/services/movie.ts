@@ -95,4 +95,8 @@ export class MovieService {
   getSelectedId$(): Observable<number | null> {
     return this.selectedId$.asObservable();
   }
+
+  clearSelection() {
+    this.selectedId$.next(null);
+  }
 }

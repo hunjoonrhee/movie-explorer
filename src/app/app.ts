@@ -12,6 +12,7 @@ import {
   filter,
   map,
   Observable,
+  of,
   startWith,
   switchMap,
   tap,
@@ -28,8 +29,11 @@ export class App implements OnInit {
   readonly service = inject(MovieService);
   readonly control = new FormControl<string>('');
   movies$!: Observable<Movie[]>;
-  selectedMovie$!: Observable<Movie | undefined>;
+  selectedMovie$!: Observable<Movie | null | undefined>;
   isLoading = signal<boolean>(false);
+  count$!: Observable<number>;
+  averageRating$!: Observable<number>;
+  topMovie$!: Observable<Movie | undefined>;
 
   ngOnInit(): void {
     this.movies$ = combineLatest([
@@ -57,16 +61,23 @@ export class App implements OnInit {
         ),
       ),
     );
+    this.count$ = this.movies$.pipe(map((movies) => movies.length));
+    this.averageRating$ = this.movies$.pipe(
+      map((movies) => movies.reduce((sum, movie) => sum + movie.rating, 0) / movies.length),
+    );
+    this.topMovie$ = this.movies$.pipe(
+      map((movies) => movies.reduce((top, movie) => (movie.rating > top.rating ? movie : top))),
+    );
     this.selectedMovie$ = this.service.getSelectedId$().pipe(
-      filter((id) => id !== null),
       tap(() => this.isLoading.set(true)),
-      switchMap((id) => this.service.getMovieById(id)),
+      switchMap((id) => (id === null ? of(null) : this.service.getMovieById(id))),
       tap(() => this.isLoading.set(false)),
     );
   }
 
   showGenres(genre: string) {
     this.service.setGenre(genre);
+    this.service.clearSelection();
   }
 
   showDetail(id: number) {

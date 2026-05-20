@@ -1,22 +1,52 @@
-<div>
-  <input type="text" placeholder="search..." [formControl]="control" />
-  @for (genre of service.getGenres(); track genre) {
-    <button (click)="showGenres(genre)">{{ genre }}</button>
-  }
+<div class="container">
+  <header class="toolbar">
+    <input type="text" class="search" placeholder="영화 검색..." [formControl]="control" />
+    <div class="genres">
+      @for (genre of service.getGenres(); track genre) {
+        <button class="genre-btn" (click)="showGenres(genre)">{{ genre }}</button>
+      }
+    </div>
+  </header>
+
   @if (isLoading()) {
-    <span>로딩 중...</span>
+    <div class="loading">불러오는 중...</div>
   }
-  @for (movie of movies$ | async; track movie.id) {
-    <div>
-      <span (click)="showDetail(movie.id)">{{ movie.title }}</span>
-    </div>
-  }
+
+  <div class="layout">
+    <section class="movie-list">
+      @for (movie of movies$ | async; track movie.id) {
+        <div class="movie-card" (click)="showDetail(movie.id)">
+          <span class="movie-title">{{ movie.title }}</span>
+          <span class="movie-genre">{{ movie.genre }}</span>
+        </div>
+      }
+    </section>
+
+    <aside class="stats-panel">
+      <div class="stat-card">
+        <span class="stat-label">총 영화 수</span>
+        <span class="stat-value">{{ count$ | async }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">평균 평점</span>
+        <span class="stat-value">{{ (averageRating$ | async)?.toFixed(2) }}</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">최고 평점</span>
+        <span class="stat-value top-movie">{{ (topMovie$ | async)?.title }}</span>
+        <span class="stat-sub">{{ (topMovie$ | async)?.rating }}</span>
+      </div>
+    </aside>
+  </div>
+
   @if (selectedMovie$ | async; as movie) {
-    <div>
-      <span>{{ movie.title }} </span>
-      <span>{{ movie.rating }} </span>
-      <span>{{ movie.genre }} </span>
-      <span>{{ movie.description }} </span>
-    </div>
+    <section class="detail-panel">
+      <h2>{{ movie.title }}</h2>
+      <div class="detail-meta">
+        <span class="badge">{{ movie.genre }}</span>
+        <span class="rating">⭐ {{ movie.rating }}</span>
+      </div>
+      <p>{{ movie.description }}</p>
+    </section>
   }
 </div>
