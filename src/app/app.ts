@@ -5,6 +5,8 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
   catchError,
   combineLatest,
+  debounceTime,
+  distinctUntilChanged,
   EMPTY,
   filter,
   map,
@@ -30,7 +32,7 @@ export class App implements OnInit {
   ngOnInit(): void {
     this.movies$ = combineLatest([
       this.service.getSelectedGenre$(),
-      this.control.valueChanges.pipe(startWith('')),
+      this.control.valueChanges.pipe(debounceTime(300), distinctUntilChanged(), startWith('')),
     ]).pipe(
       tap(([genre, search]) => console.log('combineLatest:', genre, search)),
       switchMap(([genre, search]) =>
